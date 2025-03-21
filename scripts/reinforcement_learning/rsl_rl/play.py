@@ -135,7 +135,11 @@ def main():
         # run everything in inference mode
         with torch.inference_mode():
             # agent stepping
+            obs = torch.ones_like(obs)
             actions = policy(obs)
+            print(actions,"actions")
+            print("==========================")
+            return
             # env stepping
             obs, _, _, _ = env.step(actions)
         if args_cli.video:
