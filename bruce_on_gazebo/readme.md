@@ -17,7 +17,7 @@ cd Bruce-op（按照自己电脑上的文件地址来）
 Simulation/gazebo_simulation.launch
 2.创建共享内存
 python3 -m Startups.memory_manager
-3.启动评估
+3.启动仿真（BRUCE将初始化动作）
 python3 -m Startups.run_simulation
 4.运行预设动作
 python3 set_joint_position.py
