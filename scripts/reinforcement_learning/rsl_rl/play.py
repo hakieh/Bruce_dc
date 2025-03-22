@@ -40,6 +40,10 @@ args_cli = parser.parse_args()
 # always enable cameras to record video
 if args_cli.video:
     args_cli.enable_cameras = True
+if args_cli.task ==None:
+   args_cli.task = "Isaac-Velocity-Flat-Bruce-v0"
+if args_cli.num_envs == None:
+    args_cli.num_envs = 4
 
 # launch omniverse app
 app_launcher = AppLauncher(args_cli)

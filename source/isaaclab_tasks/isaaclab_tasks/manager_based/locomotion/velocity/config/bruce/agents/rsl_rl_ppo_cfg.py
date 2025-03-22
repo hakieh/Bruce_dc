@@ -45,7 +45,7 @@ class BruceFlatPPORunnerCfg(BruceRoughPPORunnerCfg):
     def __post_init__(self):
         super().__post_init__()
 
-        self.max_iterations = 1500
+        self.max_iterations = 100000
         self.experiment_name = "Bruce_flat"
         self.policy.actor_hidden_dims = [256, 128, 128]
         self.policy.critic_hidden_dims = [256, 128, 128]
