@@ -34,4 +34,5 @@ python3 -m Startups.run_bear（启动腿部电机）
 python3 -m Startups.run_dxl（启动手臂舵机）
 #注意：执行此动作后，BRUCE手臂将伸直，因此在执行前，请务必确认手臂两旁无遮挡！！！
 运行预设动作（可根据需要更改）
+终端3：
 python3 set_joint_position.py
