@@ -8,6 +8,9 @@
 """Launch Isaac Sim Simulator first."""
 
 import argparse
+from datetime import datetime
+
+import numpy as np
 
 from isaaclab.app import AppLauncher
 
@@ -129,19 +132,26 @@ def main():
     # reset environment
     obs, _ = env.get_observations()
     timestep = 0
+    time_log = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     # simulate environment
+    actions_history = []
     while simulation_app.is_running():
         start_time = time.time()
         # run everything in inference mode
         with torch.inference_mode():
             # agent stepping
-            obs = torch.ones_like(obs)
+            # obs = torch.ones_like(obs)
             actions = policy(obs)
-            print(actions,"actions")
-            print("==========================")
-            return
+            actions_history.append(actions.squeeze(0))
+            # print(actions,"actions")
+            # print("==========================")
+            # return
             # env stepping
             obs, _, _, _ = env.step(actions)
+            if len(actions_history) == 500:
+                result_tensor = torch.stack(actions_history, dim=0)
+                result_tensor = result_tensor.cpu().numpy()
+                np.save(f"/home/kh/hkh/code/isaaclab_pip_1/weight/actions_history_{time_log}.npy",result_tensor)
         if args_cli.video:
             timestep += 1
             # Exit the play loop after recording one video
