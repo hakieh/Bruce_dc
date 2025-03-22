@@ -68,6 +68,16 @@ BRUCE_CFG = ArticulationCfg(
         joint_vel={".*": 0.0},
     ),
     soft_joint_pos_limit_factor=0.9,
+        # self.leg_p_gains = [265, 150,  80,  80,    30]
+        # self.leg_i_gains = [  0,   0,   0,   0,     0]
+        # self.leg_d_gains = [ 1., 2.3, 0.8, 0.8, 0.003]
+        # # pd test
+        # # self.leg_p_gains = [40, 40,  40,  40,   40]
+        # # self.leg_d_gains = [ 1., 1, 1, 1, 1]
+
+        # self.arm_p_gains = [ 1.6,  1.6,  1.6]
+        # self.arm_i_gains = [   0,    0,    0]
+        # self.arm_d_gains = [0.03, 0.03, 0.03]
 
 
     actuators={
@@ -82,19 +92,18 @@ BRUCE_CFG = ArticulationCfg(
                 "hip_roll_r",
                 "hip_pitch_r",
                 "knee_pitch_r",
-                
             ],
             effort_limit=300,
             velocity_limit=100.0,
             stiffness={
-                "hip_yaw_r": 25,
-                "hip_roll_r":  25,
-                "hip_pitch_r":  25,
-                "knee_pitch_r":  25,
-                "hip_yaw_l":  25,
-                "hip_roll_l": 25,
-                "hip_pitch_l":  25,
-                "knee_pitch_l":  25,
+                "hip_yaw_r": 265,
+                "hip_roll_r":  150,
+                "hip_pitch_r":  80,
+                "knee_pitch_r":  80,
+                "hip_yaw_l":  265,
+                "hip_roll_l": 150,
+                "hip_pitch_l":  80,
+                "knee_pitch_l":  80,
                 # "torso_joint": 200.0,
             },
             damping={
@@ -103,14 +112,14 @@ BRUCE_CFG = ArticulationCfg(
                 # ".*_hip_pitch_joint": 5.0,
                 # ".*_knee_joint": 5.0,
                 # "torso_joint": 5.0,
-                "hip_yaw_r": 0.5,
-                "hip_roll_r": 0.5,
-                "hip_pitch_r":  0.5,
-                "knee_pitch_r": 0.5,
-                "hip_yaw_l":  0.5,
-                "hip_roll_l":  0.5,
-                "hip_pitch_l":  0.5,
-                "knee_pitch_l":  0.5,
+                "hip_yaw_r": 1,
+                "hip_roll_r": 2.3,
+                "hip_pitch_r":  0.8,
+                "knee_pitch_r": 0.8,
+                "hip_yaw_l":  1,
+                "hip_roll_l":  2.3,
+                "hip_pitch_l":  0.8,
+                "knee_pitch_l":  0.8,
             },
             armature={
                 "hip_yaw_r": 0.01,
@@ -128,8 +137,8 @@ BRUCE_CFG = ArticulationCfg(
             velocity_limit=100.0,
             effort_limit=20,
             joint_names_expr=["ankle_pitch_r","ankle_pitch_l"],
-            stiffness=25.0,
-            damping=0.5,
+            stiffness=30,
+            damping=0.003,
             armature=0.01,
         ),
         "arms":  DCMotorCfg(
