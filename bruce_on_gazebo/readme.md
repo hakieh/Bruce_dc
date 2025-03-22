@@ -27,6 +27,7 @@ python3 set_joint_position.py
 #进入目录
 cd Bruce-op（按照自己电脑上的文件地址来）
 终端1：
+python3 -m Startups.memory_manager
 Startups/usb_latency_setup.sh
 python3 -m Startups.run_bear（启动腿部电机）
 终端2：
