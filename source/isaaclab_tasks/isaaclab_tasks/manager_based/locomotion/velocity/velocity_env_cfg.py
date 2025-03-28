@@ -121,6 +121,10 @@ class ObservationsCfg:
         """Observations for policy group."""
 
         # observation terms (order preserved)
+        # base_lin_vel = ObsTerm(func=mdp.base_lin_vel, noise=Unoise(n_min=-0.1, n_max=0.1))
+        '''
+         python train.py  --task Isaac-Velocity-Flat-Bruce-v0 --num_envs 4096 --headless --max_iterations 100000  --resume 1 --load_run 2025-03-24_19-18-17  --checkpoint model_2000.pt
+        '''
         base_lin_vel = ObsTerm(func=mdp.base_lin_vel, noise=Unoise(n_min=-0.1, n_max=0.1))
         base_ang_vel = ObsTerm(func=mdp.base_ang_vel, noise=Unoise(n_min=-0.2, n_max=0.2))
         projected_gravity = ObsTerm(
@@ -167,8 +171,8 @@ class EventCfg:
         func=mdp.randomize_rigid_body_mass,
         mode="startup",
         params={
-            "asset_cfg": SceneEntityCfg("robot", body_names="base"),
-            "mass_distribution_params": (-5.0, 5.0),
+            "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
+            "mass_distribution_params": (-0.05, 0.05),
             "operation": "add",
         },
     )
@@ -178,7 +182,7 @@ class EventCfg:
         func=mdp.apply_external_force_torque,
         mode="reset",
         params={
-            "asset_cfg": SceneEntityCfg("robot", body_names="base"),
+            "asset_cfg": SceneEntityCfg("robot", body_names="base_link"),
             "force_range": (0.0, 0.0),
             "torque_range": (-0.0, 0.0),
         },
@@ -213,8 +217,8 @@ class EventCfg:
     push_robot = EventTerm(
         func=mdp.push_by_setting_velocity,
         mode="interval",
-        interval_range_s=(10.0, 15.0),
-        params={"velocity_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5)}},
+        interval_range_s=(4, 8.0),
+        params={"velocity_range": {"x": (-1, 1), "y": (0, 0)}},
     )
 
 
@@ -232,12 +236,12 @@ class RewardsCfg:
     # -- penalties
     lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-2.0)
     ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
-    dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-1.0e-5)
+    dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-1.0e-7)
     dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7)
-    action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.01)
+    action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-1)
     feet_air_time = RewTerm(
         func=mdp.feet_air_time,
-        weight=0.125,
+        weight=0.5,
         params={
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*FOOT"),
             "command_name": "base_velocity",

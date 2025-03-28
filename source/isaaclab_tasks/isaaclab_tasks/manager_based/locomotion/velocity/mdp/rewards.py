@@ -59,8 +59,14 @@ def feet_air_time_positive_biped(env, command_name: str, threshold: float, senso
     in_contact = contact_time > 0.0
     in_mode_time = torch.where(in_contact, contact_time, air_time)
     single_stance = torch.sum(in_contact.int(), dim=1) == 1
+
     reward = torch.min(torch.where(single_stance.unsqueeze(-1), in_mode_time, 0.0), dim=1)[0]
     reward = torch.clamp(reward, max=threshold)
+
+    over_limit = torch.logical_or(air_time > 0.5, contact_time > 0.5)
+    any_over_limit = torch.any(over_limit, dim=1)
+    reward = torch.where(any_over_limit, -reward, reward)
+
     # no reward for zero command
     reward *= torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1) > 0.1
     return reward
@@ -154,11 +160,15 @@ def joint_pos_limits(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEn
 
 
 
-    out_of_limits_FR = -(asset.data.joint_pos[:, 12] - 1).clip(min=0.0)
+    out_of_limits_FR = -(asset.data.joint_pos[:, 12] - 1).clip(min=0.0) #大于1给惩罚
     out_of_limits_FL = -(asset.data.joint_pos[:, 13] - 1).clip(min=0.0)
 
     out_of_limits_FR_min = (asset.data.joint_pos[:, 12] + 1).clip(max=0.0)
-    out_of_limits_FL_min = (asset.data.joint_pos[:, 13] + 1).clip(max=0.0)
+    out_of_limits_FL_min = (asset.data.joint_pos[:, 13] + 1).clip(max=0.0) #小于-1给惩罚
+
+    out_of_limits_hip_roll_l = (asset.data.joint_pos[:, 8] + 0.1).clip(max=0.0)
+    out_of_limits_hip_roll_r = -(asset.data.joint_pos[:, 9] - 0.1).clip(min=0.0)
+    # print(asset.data.joint_pos[:, 8],asset.data.joint_pos[:, 9])
 
     # calf_limits_FR_min = (-1.5 - asset.data.joint_pos[:, 8] ).clip(max=0.0)
     # calf_limits_FL_min = (-1.5 - asset.data.joint_pos[:, 9] ).clip(max=0.0)
@@ -173,6 +183,25 @@ def joint_pos_limits(env: ManagerBasedRLEnv, asset_cfg: SceneEntityCfg = SceneEn
 
     # print(asset_cfg.joint_ids)
     # out_of_limits =  #fl + rl + fr + rr + out_of_limits_RR+ out_of_limits_RL + out_of_limits_RR_min + out_of_limits_RL_min + calf_limits_RR_min + calf_limits_RL_min\
-    out_of_limits = out_of_limits_FR + out_of_limits_FL + out_of_limits_FR_min + out_of_limits_FL_min  #+ calf_limits_FR_min + calf_limits_FL_min
+    out_of_limits = out_of_limits_FR + out_of_limits_FL + out_of_limits_FR_min + out_of_limits_FL_min +out_of_limits_hip_roll_l +out_of_limits_hip_roll_r #+ calf_limits_FR_min + calf_limits_FL_min
     return  out_of_limits #torch.sum(out_of_limits)
 
+def feet_swip(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
+    """Penalize feet sliding.
+
+    This function penalizes the agent for sliding its feet on the ground. The reward is computed as the
+    norm of the linear velocity of the feet multiplied by a binary contact sensor. This ensures that the
+    agent is penalized only when the feet are in contact with the ground.
+    """
+    # Penalize feet sliding
+    # contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    # contacts = contact_sensor.data.net_forces_w_history[:, :, sensor_cfg.body_ids, :].norm(dim=-1).max(dim=1)[0] > 1.0
+    asset = env.scene[asset_cfg.name]
+
+    hip_vel_pitch_l = asset.data.joint_vel[:, 4]
+    hip_vel_pitch_r = asset.data.joint_vel[:, 5]
+
+    reward = torch.abs(hip_vel_pitch_l-hip_vel_pitch_r)
+    # print(reward)
+    # reward = torch.sum(body_vel.norm(dim=-1) * contacts, dim=1)
+    return reward

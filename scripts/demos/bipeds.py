@@ -76,6 +76,7 @@ def run_simulator(sim: sim_utils.SimulationContext, robots: list[Articulation], 
     sim_dt = sim.get_physics_dt()
     sim_time = 0.0
     count = 0
+    j = 0
     # Simulate physics
     while simulation_app.is_running():
         # reset
@@ -92,7 +93,10 @@ def run_simulator(sim: sim_utils.SimulationContext, robots: list[Articulation], 
                 robot.write_root_pose_to_sim(root_state[:, :7])
                 robot.write_root_velocity_to_sim(root_state[:, 7:])
                 robot.reset()
+                
+            
             # reset command
+            
             print(">>>>>>>> Reset!")
         # apply action to the robot
         for robot in robots:

@@ -121,12 +121,12 @@ def main():
         
         # apply actins
         # # generate random joint positions
-        joint_pos_target = robot.data.default_joint_pos
-        print(robot.data.root_pos_w[:,2],"height")
-        # # apply action to the robot
-        robot.set_joint_position_target(joint_pos_target)
-        # # write data to sim
-        robot.write_data_to_sim()
+        # joint_pos_target = robot.data.default_joint_pos
+        # print(robot.data.root_pos_w[:,2],"height")
+        # # # apply action to the robot
+        # robot.set_joint_position_target(joint_pos_target)
+        # # # write data to sim
+        # robot.write_data_to_sim()
         # pos = robots[0].data.joint_pos
                 #----------------
         # print(pos)

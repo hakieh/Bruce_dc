@@ -31,7 +31,7 @@ class ViewerCfg:
     which is the default camera in the viewport.
     """
 
-    resolution: tuple[int, int] = (1280, 720)
+    resolution: tuple[int, int] = (1920, 1080)
     """The resolution (width, height) of the camera specified using :attr:`cam_prim_path`.
     Default is (1280, 720).
     """

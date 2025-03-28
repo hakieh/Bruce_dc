@@ -28,7 +28,7 @@ class BeuceRwards(RewardsCfg):
     termination_penalty = RewTerm(func=mdp.is_terminated, weight=-200.0)
     track_lin_vel_xy_exp = RewTerm(
         func=mdp.track_lin_vel_xy_yaw_frame_exp,
-        weight=1.0,
+        weight=2.0,
         params={"command_name": "base_velocity", "std": 0.5},
     )
     track_ang_vel_z_exp = RewTerm(
@@ -39,30 +39,44 @@ class BeuceRwards(RewardsCfg):
         weight=0.25,
         params={
             "command_name": "base_velocity",
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="ankle_pitch_link_.*"),
-            "threshold": 1,#
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle.*"),
+            "threshold": 0.3,
         },
     )
     feet_slide = RewTerm(
         func=mdp.feet_slide,
         weight=-0.1,
         params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names="ankle_pitch_link_.*"),
-            "asset_cfg": SceneEntityCfg("robot", body_names="ankle_pitch_link_.*"),
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle.*"),
+            "asset_cfg": SceneEntityCfg("robot", body_names=".*ankle.*"),
         },
     )
 
     # Penalize ankle joint limits
     dof_pos_limits = RewTerm(
         func=mdp.joint_pos_limits,
-        weight=-1.0,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=["ankle_pitch_.*"])},
+        weight=1.0,
+        params={"asset_cfg": SceneEntityCfg("robot")},
     )
     # Penalize deviation from default of the joints that are not essential for locomotion
     joint_deviation_hip = RewTerm(
         func=mdp.joint_deviation_l1,
-        weight=-0.1,
+        weight=-0.5,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["hip_yaw_.*", "hip_roll_.*"])},
+    )
+    joint_pitch = RewTerm(
+        func=mdp.feet_swip,
+        weight=0.2,
+        params={"asset_cfg": SceneEntityCfg("robot")},
+    )
+    joint_vel = RewTerm(
+        func=mdp.joint_vel_l2,
+        weight=-0.01,
+        params={"asset_cfg": SceneEntityCfg("robot")}
+    )
+    alive  = RewTerm(
+        func=mdp.is_alive,
+        weight=0.5
     )
     # joint_deviation_arms = RewTerm(
     #     func=mdp.joint_deviation_l1,
@@ -133,8 +147,8 @@ class BruceRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
 
         # Randomization
-        self.events.push_robot = None
-        self.events.add_base_mass = None
+        # self.events.push_robot = None
+        # self.events.add_base_mass = None
         self.events.reset_robot_joints.params["position_range"] = (1.0, 1.0)
         self.events.base_external_force_torque.params["asset_cfg"].body_names = ["base_link"]
         self.events.reset_base.params = {
@@ -150,10 +164,10 @@ class BruceRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         }
 
         # Rewards
-        self.rewards.lin_vel_z_l2.weight = 0.0
+        # self.rewards.lin_vel_z_l2.weight = 0.0
         self.rewards.undesired_contacts = None
         self.rewards.flat_orientation_l2.weight = -1.0
-        self.rewards.action_rate_l2.weight = -0.005
+        self.rewards.action_rate_l2.weight = -0.5
         self.rewards.dof_acc_l2.weight = -1.25e-7
         self.rewards.dof_acc_l2.params["asset_cfg"] = SceneEntityCfg(
             "robot", joint_names=["hip_.*", "knee_.*"]
@@ -167,8 +181,8 @@ class BruceRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.commands.base_velocity.ranges.lin_vel_x = (0.0, 1.0)
         self.commands.base_velocity.ranges.lin_vel_y = (-0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (0.0, 0.0)
-
-        self.terminations.base_contact.params["sensor_cfg"].body_names = ["hip_.*","base.*"]
+        
+        self.terminations.base_contact.params["sensor_cfg"].body_names = ["hip_.*","base.*","shoulder.*"]
 @configclass
 class BruceRoughEnvCfg_PLAY(BruceRoughEnvCfg):
     def __post_init__(self):

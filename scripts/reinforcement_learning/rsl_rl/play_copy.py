@@ -68,7 +68,7 @@ from isaaclab.utils.pretrained_checkpoint import get_published_pretrained_checkp
 
 import isaaclab_tasks  # noqa: F401
 from isaaclab_tasks.utils import get_checkpoint_path, parse_env_cfg
-import pandas as pd
+
 
 def main():
     """Play with RSL-RL agent."""
@@ -92,7 +92,7 @@ def main():
         resume_path = retrieve_file_path(args_cli.checkpoint)
     else:
         print(agent_cfg.load_checkpoint,agent_cfg.load_run)
-        resume_path = get_checkpoint_path(log_root_path, agent_cfg.load_run, "model_2000.pt" )#agent_cfg.load_checkpoint #agent_cfg.load_checkpoint
+        resume_path = get_checkpoint_path(log_root_path, agent_cfg.load_run, agent_cfg.load_checkpoint)#
     # print("loding model from: ",resume_path)
     log_dir = os.path.dirname(resume_path)
 
@@ -143,8 +143,6 @@ def main():
     time_log = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     # simulate environment
     actions_history = []
-    actions_his_np = []
-    obs_hisotry = []
     while simulation_app.is_running():
         start_time = time.time()
         # run everything in inference mode
@@ -153,12 +151,6 @@ def main():
             # obs = torch.ones_like(obs)
             actions = policy(obs)
             actions_history.append(actions.squeeze(0))
-            actions_his_np.append(actions.squeeze(0).cpu().numpy())
-            dof_sim_pos = obs[:,12:28]
-            col = [0,1,4,5,8,9] + list(range(12,16))
-            joint_pos = dof_sim_pos[:,col]
-            print(joint_pos.shape)
-            obs_hisotry.append(joint_pos.squeeze(0).cpu().numpy())
             # print(actions,"actions")
             # print("==========================")
             # return
@@ -167,18 +159,7 @@ def main():
             if len(actions_history) == 500:
                 result_tensor = torch.stack(actions_history, dim=0)
                 result_tensor = result_tensor.cpu().numpy()
-                if args_cli.num_envs ==1:
-                    obs_hisotry_pd = pd.DataFrame(obs_hisotry)
-                    actions_history_pd = pd.DataFrame(actions_his_np)
-                    np.save(f"/home/kh/hkh/code/isaaclab_pip_1/weight/actions_history_{time_log}.npy",result_tensor)
-                    print("save actions history!")
-                    path_actions = "/home/kh/hkh/data/excle/bruce/actions"+time_log+".xlsx"
-                    with pd.ExcelWriter(path_actions,'auto') as xlsx:
-                        actions_history_pd.to_excel(xlsx)
-                    path_obs = "/home/kh/hkh/data/excle/bruce/obs"+time_log+".xlsx"
-                    with pd.ExcelWriter(path_obs,'auto') as xlsx:
-                        obs_hisotry_pd.to_excel(xlsx)
-                        # obs_hisotry.to_excle
+                np.save(f"/home/kh/hkh/code/isaaclab_pip_1/weight/actions_history_{time_log}.npy",result_tensor)
         if args_cli.video:
             timestep += 1
             # Exit the play loop after recording one video
