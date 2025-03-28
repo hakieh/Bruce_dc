@@ -44,7 +44,7 @@ if args_cli.task ==None:
    args_cli.task = "Isaac-Velocity-Flat-Bruce-v0"
 if args_cli.num_envs == None:
     args_cli.num_envs = 4
-
+#a
 # launch omniverse app
 app_launcher = AppLauncher(args_cli)
 simulation_app = app_launcher.app
