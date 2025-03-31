@@ -59,17 +59,79 @@ def feet_air_time_positive_biped(env, command_name: str, threshold: float, senso
     in_contact = contact_time > 0.0
     in_mode_time = torch.where(in_contact, contact_time, air_time)
     single_stance = torch.sum(in_contact.int(), dim=1) == 1
-
-    reward = torch.min(torch.where(single_stance.unsqueeze(-1), in_mode_time, 0.0), dim=1)[0]
+    
+    reward = torch.min(torch.where(single_stance.unsqueeze(-1), in_mode_time, 0.0), dim=1)[0]  #单腿接触地面时才有值，选择两条腿中较低的数值作为奖励
+    # print(reward,"reward1")
     reward = torch.clamp(reward, max=threshold)
-
-    over_limit = torch.logical_or(air_time > 0.5, contact_time > 0.5)
+    # reward = torch.clamp(reward, max=threshold)
+    over_limit = torch.logical_or(air_time > 0.3, contact_time > 0.3)
+    print(over_limit)
+    # print(sensor_cfg.name)
+    # print(sensor_cfg.body_ids)
+    # print(air_time,"airtime")
+    # print(contact_time,"contact time")
     any_over_limit = torch.any(over_limit, dim=1)
+    # print(any_over_limit,"any_over_limit")
     reward = torch.where(any_over_limit, -reward, reward)
-
+    
+    # print(reward,"reward2")
     # no reward for zero command
+    # print(reward.shape,"b")
     reward *= torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1) > 0.1
     return reward
+
+def feet_air_time_positive_biped_sum(env, command_name: str, threshold: float, sensor_cfg: SceneEntityCfg) -> torch.Tensor:
+    """Reward long steps taken by the feet for bipeds.
+
+    This function rewards the agent for taking steps up to a specified threshold and also keep one foot at
+    a time in the air.
+
+    If the commands are small (i.e. the agent is not supposed to take a step), then the reward is zero.
+    """
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    # compute the reward
+    air_time = contact_sensor.data.current_air_time[:, sensor_cfg.body_ids]
+    contact_time = contact_sensor.data.current_contact_time[:, sensor_cfg.body_ids]
+    contact_time_f = contact_sensor.data.current_contact_time[:, [10,5]]
+    in_contact = contact_time > 0.0
+    air_time_n = air_time + 1e-6
+    contact_time_n = contact_time_f + 1e-6
+    # print(air_time,"air_time")
+    # print(contact_time,"contact_time")
+    pre_time = air_time_n/contact_time_n
+    # print(pre_time,"pre_time")
+    
+    l_time = pre_time[:,0:1]
+    r_time = pre_time[:,1:2]
+    # print(l_time.shape,"l_shape")
+    time = torch.where(in_contact[:,0].unsqueeze(1), r_time,l_time )
+    # print(in_contact[:,0].unsqueeze(1).shape,"contact")
+    # print(time,"time")
+    # print(time.shape,"time shape")
+    time_small = torch.min(1/time,time)
+    # print(time_small)
+
+    # in_mode_time = torch.where(in_contact, contact_time, air_time)
+    single_stance = torch.sum(in_contact.int(), dim=1) == 1
+    
+    reward = torch.where(single_stance.unsqueeze(-1), time_small, 0.0).squeeze(0)  #单腿接触地面时才有值，选择两条腿中数值和作为奖励
+    # print(reward,"reward")
+    # reward = torch.exp(reward)-1
+
+    over_limit = torch.logical_or(air_time > 0.3, contact_time > 0.3)
+    # print(sensor_cfg.name)
+    # print(sensor_cfg.body_ids)
+
+    any_over_limit = torch.any(over_limit, dim=1).unsqueeze(1)
+    # print(any_over_limit.shape,"any_over_limit")
+    reward = torch.where(any_over_limit, -reward, reward).squeeze(0)
+    reward = reward.squeeze(1)
+    # print(reward,"reward")
+    # no reward for zero command
+    # print(reward.shape,"c")
+    reward *= torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1) > 0.1
+    return reward
+
 
 
 def feet_slide(env, sensor_cfg: SceneEntityCfg, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
@@ -124,7 +186,7 @@ def ankle_flat(env, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torc
     body_vel = asset.data.body_lin_vel_w[:, asset_cfg.body_ids, :2]
     ankle_angle = asset.data.joint_pos[:,14:16]
     # reward = torch.sum(body_vel.norm(dim=-1) * contacts, dim=1)
-    reward = torch.sum(torch.abs(ankle_angle), dim=1)
+    reward = torch.sum(torch.abs(ankle_angle-0.5), dim=1)
     return reward
 
 

@@ -27,7 +27,7 @@ BRUCE_CFG = ArticulationCfg(
     ),
 
     init_state=ArticulationCfg.InitialStateCfg(
-        pos=(0.0, 0.0, 0.5),
+        pos=(0.0, 0.0, 0.74),
         joint_pos={
             # ".*_hip_pitch_joint": -0.20,
             # ".*_knee_joint": 0.42,
@@ -43,16 +43,16 @@ BRUCE_CFG = ArticulationCfg(
             # "right_two_joint": -0.52,
             'hip_yaw_l' :0.,   # [rad]
             'hip_roll_l':0.,   # [rad]
-            'hip_pitch_l' :0.,   # [rad]
-            'knee_pitch_l' :0.,   # [rad]
-            'ankle_pitch_l':0.,   # [rad]
+            'hip_pitch_l' :0.6,   # [rad]
+            'knee_pitch_l' :-1,   # [rad]
+            'ankle_pitch_l':0.5,   # [rad]
             # 'hip_yaw_r' :2.,   # [rad]
             'hip_yaw_r' :0,   # [rad]
             'hip_roll_r' :0.,   # [rad]
             # 'hip_pitch_r' :0.,   # [rad]
-            'hip_pitch_r' :0,   # [rad]
-            'knee_pitch_r' :0.,   # [rad]
-            'ankle_pitch_r' :0.,   # [rad]
+            'hip_pitch_r' :0.6,   # [rad]
+            'knee_pitch_r' :-1,   # [rad]
+            'ankle_pitch_r' :0.5,   # [rad]
             # 'shoulder_pitch_l' :2.35,   # [rad]
             'shoulder_pitch_l' :0.35,   # [rad]
             # 'shoulder_roll_l' :-0.16,   # [rad]

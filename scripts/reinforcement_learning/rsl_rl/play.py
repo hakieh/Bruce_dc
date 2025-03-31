@@ -44,7 +44,9 @@ if args_cli.video:
 if args_cli.task ==None:
    args_cli.task = "Isaac-Velocity-Flat-Bruce-v0"
 if args_cli.num_envs == None:
-    args_cli.num_envs = 4
+    args_cli.num_envs = 1
+if args_cli.load_run ==None:
+    args_cli.load_run ="2025-03-30_14-43-24"
 # args_cli.checkpoint="2025-03-24_19-18-17/model_1000.pt."
 #a
 # launch omniverse app
@@ -157,13 +159,14 @@ def main():
             dof_sim_pos = obs[:,12:28]
             col = [0,1,4,5,8,9] + list(range(12,16))
             joint_pos = dof_sim_pos[:,col]
-            print(joint_pos.shape)
+            # print(joint_pos.shape)
             obs_hisotry.append(joint_pos.squeeze(0).cpu().numpy())
             # print(actions,"actions")
             # print("==========================")
             # return
             # env stepping
             obs, _, _, _ = env.step(actions)
+            # print(actions)
             if len(actions_history) == 500:
                 result_tensor = torch.stack(actions_history, dim=0)
                 result_tensor = result_tensor.cpu().numpy()

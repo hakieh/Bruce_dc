@@ -35,12 +35,21 @@ class BeuceRwards(RewardsCfg):
         func=mdp.track_ang_vel_z_world_exp, weight=2.0, params={"command_name": "base_velocity", "std": 0.5}
     )
     feet_air_time = RewTerm(
-        func=mdp.feet_air_time_positive_biped,
-        weight=0.25,
+        func=mdp.feet_air_time_positive_biped, #feet_air_time_positive_biped,
+        weight=0,
         params={
             "command_name": "base_velocity",
             "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle.*"),
             "threshold": 0.3,
+        },
+    )
+    feet_dc = RewTerm(
+        func=mdp.feet_air_time_positive_biped_sum, #feet_air_time_positive_biped,
+        weight=1,
+        params={
+            "command_name": "base_velocity",
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*ankle.*"),
+            "threshold": 0.1,
         },
     )
     feet_slide = RewTerm(
@@ -61,7 +70,7 @@ class BeuceRwards(RewardsCfg):
     # Penalize deviation from default of the joints that are not essential for locomotion
     joint_deviation_hip = RewTerm(
         func=mdp.joint_deviation_l1,
-        weight=-0.5,
+        weight=-1,
         params={"asset_cfg": SceneEntityCfg("robot", joint_names=["hip_yaw_.*", "hip_roll_.*"])},
     )
     joint_pitch = RewTerm(
