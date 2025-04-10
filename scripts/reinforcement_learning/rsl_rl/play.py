@@ -27,6 +27,7 @@ parser.add_argument(
 parser.add_argument("--num_envs", type=int, default=None, help="Number of environments to simulate.")
 parser.add_argument("--task", type=str, default=None, help="Name of the task.")
 parser.add_argument("--load_checkpoint", type=str, default=None, help="Name of the task.")
+parser.add_argument("--cp", type=str, default=None, help="Name of the task.")
 parser.add_argument(
     "--use_pretrained_checkpoint",
     action="store_true",
@@ -94,8 +95,8 @@ def main():
         resume_path = retrieve_file_path(args_cli.checkpoint)
     else:
         print(agent_cfg.load_checkpoint,agent_cfg.load_run)
-        resume_path = get_checkpoint_path(log_root_path, agent_cfg.load_run, "model_2000.pt" )#agent_cfg.load_checkpoint #agent_cfg.load_checkpoint
-    # print("loding model from: ",resume_path)
+        resume_path = get_checkpoint_path(log_root_path, agent_cfg.load_run, args_cli.cp )# "model_2000.pt"agent_cfg.load_checkpoint #agent_cfg.load_checkpoint
+    # print("loding model from: ",resume_path)  
     log_dir = os.path.dirname(resume_path)
 
     # create isaac environment

@@ -30,7 +30,7 @@ import isaaclab_tasks.manager_based.locomotion.velocity.mdp as mdp
 ##
 from isaaclab.terrains.config.rough import ROUGH_TERRAINS_CFG  # isort: skip
 
-
+from isaaclab.terrains.config.wave_terrain import WAVE_TERRAINS_CFG
 ##
 # Scene definition
 ##
@@ -80,6 +80,9 @@ class MySceneCfg(InteractiveSceneCfg):
             texture_file=f"{ISAAC_NUCLEUS_DIR}/Materials/Textures/Skies/PolyHaven/kloofendal_43d_clear_puresky_4k.hdr",
         ),
     )
+    foot_contact_forces = ContactSensorCfg(
+        prim_path="{ENV_REGEX_NS}/Robot/.*ankle.*", update_period=0.0, history_length=6, debug_vis=False
+    )
 
 
 ##
@@ -125,7 +128,7 @@ class ObservationsCfg:
         '''
          python train.py  --task Isaac-Velocity-Flat-Bruce-v0 --num_envs 4096 --headless --max_iterations 100000  --resume 1 --load_run 2025-03-24_19-18-17  --checkpoint model_2000.pt
         '''
-        base_lin_vel = ObsTerm(func=mdp.base_lin_vel, noise=Unoise(n_min=-0.1, n_max=0.1))
+        # base_lin_vel = ObsTerm(func=mdp.base_lin_vel, noise=Unoise(n_min=-0.1, n_max=0.1))
         base_ang_vel = ObsTerm(func=mdp.base_ang_vel, noise=Unoise(n_min=-0.2, n_max=0.2))
         projected_gravity = ObsTerm(
             func=mdp.projected_gravity,
@@ -141,6 +144,7 @@ class ObservationsCfg:
             noise=Unoise(n_min=-0.1, n_max=0.1),
             clip=(-1.0, 1.0),
         )
+        cf = ObsTerm(func=mdp.feet_contact, params={"sensor_cfg": SceneEntityCfg("foot_contact_forces"),"threshold": 0.5})
 
         def __post_init__(self):
             self.enable_corruption = True

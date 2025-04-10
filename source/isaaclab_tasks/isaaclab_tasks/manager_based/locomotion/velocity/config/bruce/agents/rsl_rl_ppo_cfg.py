@@ -14,7 +14,7 @@ from isaaclab_rl.rsl_rl.rl_cfg import (
 @configclass
 class BruceRoughPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 24
-    max_iterations = 3000
+    max_iterations = 300000
     save_interval = 50
     experiment_name = "bruce_rough"
     empirical_normalization = False
