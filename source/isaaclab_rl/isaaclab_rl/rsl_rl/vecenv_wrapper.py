@@ -179,6 +179,7 @@ class RslRlVecEnvWrapper(VecEnv):
         # print(temp_action.shape)
         # print(temp_action[:,0,1,4,5,8,9,12,13,14,15].shape)
         col = [0,1,4,5,8,9] + list(range(12,16))
+        col = [0,4,8,12,14,1,5,9,13,15]
         temp_action[:,col] = actions
         
         temp_action[:,2] = 0

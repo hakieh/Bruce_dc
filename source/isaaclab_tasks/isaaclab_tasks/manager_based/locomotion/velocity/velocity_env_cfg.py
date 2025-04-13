@@ -135,16 +135,34 @@ class ObservationsCfg:
             noise=Unoise(n_min=-0.05, n_max=0.05),
         )
         velocity_commands = ObsTerm(func=mdp.generated_commands, params={"command_name": "base_velocity"})
-        joint_pos = ObsTerm(func=mdp.joint_pos_rel, noise=Unoise(n_min=-0.01, n_max=0.01))
-        joint_vel = ObsTerm(func=mdp.joint_vel_rel, noise=Unoise(n_min=-1.5, n_max=1.5))
+        joint_pos_l = ObsTerm(func=mdp.joint_pos_rel_l, noise=Unoise(n_min=-0.01, n_max=0.01))
+        joint_vel_l = ObsTerm(func=mdp.joint_vel_rel_l, noise=Unoise(n_min=-1.5, n_max=1.5))
         actions = ObsTerm(func=mdp.last_action)
-        height_scan = ObsTerm(
-            func=mdp.height_scan,
-            params={"sensor_cfg": SceneEntityCfg("height_scanner")},
-            noise=Unoise(n_min=-0.1, n_max=0.1),
-            clip=(-1.0, 1.0),
+        # height_scan = ObsTerm(
+        #     func=mdp.height_scan,
+        #     params={"sensor_cfg": SceneEntityCfg("height_scanner")},
+        #     noise=Unoise(n_min=-0.1, n_max=0.1),
+        #     clip=(-1.0, 1.0),
+        # )
+        cf_l = ObsTerm(func=mdp.feet_contact, params={"sensor_cfg": SceneEntityCfg("foot_contact_forces"),"threshold": 0.5})
+
+
+        base_ang_vel_r = ObsTerm(func=mdp.base_ang_vel, noise=Unoise(n_min=-0.2, n_max=0.2))
+        projected_gravity_r = ObsTerm(
+            func=mdp.projected_gravity,
+            noise=Unoise(n_min=-0.05, n_max=0.05),
         )
-        cf = ObsTerm(func=mdp.feet_contact, params={"sensor_cfg": SceneEntityCfg("foot_contact_forces"),"threshold": 0.5})
+        velocity_commands_r = ObsTerm(func=mdp.generated_commands, params={"command_name": "base_velocity"})
+        joint_pos_r = ObsTerm(func=mdp.joint_pos_rel_r, noise=Unoise(n_min=-0.01, n_max=0.01))
+        joint_vel_r = ObsTerm(func=mdp.joint_vel_rel_r, noise=Unoise(n_min=-1.5, n_max=1.5))
+        actions_r = ObsTerm(func=mdp.last_action)
+        # height_scan = ObsTerm(
+        #     func=mdp.height_scan,
+        #     params={"sensor_cfg": SceneEntityCfg("height_scanner")},
+        #     noise=Unoise(n_min=-0.1, n_max=0.1),
+        #     clip=(-1.0, 1.0),
+        # )
+        cf_r = ObsTerm(func=mdp.feet_contact, params={"sensor_cfg": SceneEntityCfg("foot_contact_forces"),"threshold": 0.5})
 
         def __post_init__(self):
             self.enable_corruption = True
