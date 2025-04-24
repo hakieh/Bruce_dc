@@ -43,6 +43,45 @@ def feet_air_time(
     reward *= torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1) > 0.1
     return reward
 
+def calculate_sin_cos_product(tensor):
+    # 计算每行的 x^2 + y^2 + z^2
+    squared_sum = torch.sum(tensor**2, dim=1)  # 对每行的元素进行平方和
+    
+    # 计算每行的 cos(theta) 和 sin(theta)
+    v_xy = torch.sqrt(tensor[:, 0]**2 + tensor[:, 1]**2)  # x^2 + y^2 的平方根
+    v = torch.sqrt(squared_sum)  # x^2 + y^2 + z^2 的平方根
+    
+    cos_theta = v_xy / v
+    sin_theta = torch.abs(tensor[:, 2]) / v  # 使用绝对值来确保 sin(theta) 为正值
+    
+    # 计算 sin(theta) * cos(theta)
+    sin_cos_product = sin_theta * cos_theta
+    
+    return sin_cos_product
+
+def calculate_xy(tensor):
+    # 计算每行的 x^2 + y^2
+    squared_sum = torch.sum(tensor**2, dim=1)  # 对每行的元素进行平方和
+
+    v = torch.sqrt(squared_sum)  
+    
+ 
+    res = tensor/ v  
+
+    return res
+
+
+def calculate_xyz(tensor):
+    # 计算每行的 x^2 + y^2
+    squared_sum = tensor[:, 0]**2 + tensor[:, 1]**2  # 只计算 x 和 y 的平方和
+    
+    v_xy = torch.sqrt(squared_sum)  # 计算 x^2 + y^2 的平方根（即 x 和 y 的模长）
+    
+    # 计算单位向量, 只对 x 和 y 进行归一化
+    res = tensor[:, :2] / v_xy.unsqueeze(1)  # 归一化 x 和 y 维度
+    tensor[:,:2] = res
+    tensor[:,2]=0
+    return tensor
 
 def feet_air_time_positive_biped(env, command_name: str, threshold: float, sensor_cfg: SceneEntityCfg) -> torch.Tensor:
     """Reward long steps taken by the feet for bipeds.
@@ -79,6 +118,95 @@ def feet_air_time_positive_biped(env, command_name: str, threshold: float, senso
     # print(reward.shape,"b")
     reward *= torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1) > 0.1
     return reward
+
+
+def feet_contact_new(env, command_name: str, threshold: float, sensor_cfg: SceneEntityCfg, asset_cfg: SceneEntityCfg = SceneEntityCfg("robot")) -> torch.Tensor:
+    """Reward long steps taken by the feet for bipeds.
+
+    This function rewards the agent for taking steps up to a specified threshold and also keep one foot at
+    a time in the air.
+
+    If the commands are small (i.e. the agent is not supposed to take a step), then the reward is zero.
+    """
+    contact_sensor: ContactSensor = env.scene.sensors[sensor_cfg.name]
+    print(contact_sensor.data.net_forces_w.shape)
+    # feet_contact_forces = contact_sensor.data.net_forces_w[:, []e
+    contact_f = contact_sensor.data.net_forces_w
+    contact_f_bool = torch.norm(contact_f,dim=2) > 2.
+    
+
+    asset = env.scene[asset_cfg.name]
+    root_pos = asset.data.root_pos_w
+    feet_pos_l = asset.data.body_pos_w[:,5,:]
+    feet_pos_r = asset.data.body_pos_w[:,10,:]
+
+    
+    theta1 = root_pos - feet_pos_l
+    theta2 = root_pos - feet_pos_r
+    print(theta1,"theta1")
+    print(theta2,"theta2")
+    l_feet_theta = calculate_sin_cos_product(theta1)
+    r_feet_theta = calculate_sin_cos_product(theta2)
+    print(l_feet_theta,"l_feet_theta")
+    print(r_feet_theta,"r_feet_theta")
+    g = 9.8
+    m= 4.44
+    equ_rl = g*m*l_feet_theta
+    equ_rr = g*m*r_feet_theta
+    print(equ_rl,"equ_rl")
+    print(equ_rr,"equ_rr")
+ 
+    xy_l = calculate_xyz(theta1)
+    xy_r = calculate_xyz(theta2)
+
+    print(xy_l,"xy_l")
+    print(xy_r,"xy_r")
+    force_l = contact_f[:,0,:]
+    force_r = contact_f[:,1,:]
+    print(force_l,"force_l")
+    print(force_r,"force_r")
+    dot_product_l = torch.sum(force_l * xy_l, dim=1)
+    dot_product_r = torch.sum(force_r * xy_r, dim=1)
+    print(dot_product_l,"dot_product_l")
+    print(dot_product_r,"dot_product_r")
+    l_reward = torch.where(dot_product_l>0.1*equ_rl,1,0)
+    r_reward = torch.where(dot_product_r>0.1*equ_rr,1,0)
+    l_reward = torch.where(contact_f_bool[:,0],l_reward,0)
+    r_reward = torch.where(contact_f_bool[:,1],r_reward,0)
+    print(contact_f_bool,"contact_f_bool------------------------")
+    # print(contact_f_bool,"contact_f_bool------------------------")
+    print(l_reward,"l_reward")
+    print(r_reward,"r_reward")
+    reward = l_reward + r_reward
+    return reward
+    # equ_r = g 
+    # print("====================")
+    # # compute the reward
+    # air_time = contact_sensor.data.current_air_time[:, sensor_cfg.body_ids]
+    # contact_time = contact_sensor.data.current_contact_time[:, sensor_cfg.body_ids]
+    # in_contact = contact_time > 0.0
+    # in_mode_time = torch.where(in_contact, contact_time, air_time)
+    # single_stance = torch.sum(in_contact.int(), dim=1) == 1
+    
+    # reward = torch.min(torch.where(single_stance.unsqueeze(-1), in_mode_time, 0.0), dim=1)[0]  #单腿接触地面时才有值，选择两条腿中较低的数值作为奖励
+    # # print(reward,"reward1")
+    # reward = torch.clamp(reward, max=threshold)
+    # # reward = torch.clamp(reward, max=threshold)
+    # over_limit = torch.logical_or(air_time > 0.3, contact_time > 0.3)
+    # print(over_limit)
+    # # print(sensor_cfg.name)
+    # # print(sensor_cfg.body_ids)
+    # # print(air_time,"airtime")
+    # # print(contact_time,"contact time")
+    # any_over_limit = torch.any(over_limit, dim=1)
+    # # print(any_over_limit,"any_over_limit")
+    # reward = torch.where(any_over_limit, -reward, reward)
+    
+    # # print(reward,"reward2")
+    # # no reward for zero command
+    # # print(reward.shape,"b")
+    # reward *= torch.norm(env.command_manager.get_command(command_name)[:, :2], dim=1) > 0.1
+    # return reward
 
 def feet_air_time_positive_biped_sum(env, command_name: str, threshold: float, sensor_cfg: SceneEntityCfg) -> torch.Tensor:
     """Reward long steps taken by the feet for bipeds.

@@ -270,6 +270,15 @@ class RewardsCfg:
             "threshold": 0.5,
         },
     )
+    feet_contact_force = RewTerm(
+        func=mdp.feet_contact_new,
+        weight=0.5,
+        params={
+            "sensor_cfg": SceneEntityCfg("foot_contact_forces"),
+            "command_name": "base_velocity",
+            "threshold": 0.5,
+        },
+    )
     undesired_contacts = RewTerm(
         func=mdp.undesired_contacts,
         weight=-1.0,
