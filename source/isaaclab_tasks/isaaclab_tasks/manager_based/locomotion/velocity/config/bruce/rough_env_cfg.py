@@ -156,7 +156,7 @@ class BruceRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
 
         # Randomization
-        # self.events.push_robot = None
+        self.events.push_robot = None
         # self.events.add_base_mass = None
         self.scene.height_scanner = None
         self.observations.policy.height_scan = None
@@ -189,7 +189,7 @@ class BruceRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         )
 
         # Commands
-        self.commands.base_velocity.ranges.lin_vel_x = (0.0, 1.0)
+        self.commands.base_velocity.ranges.lin_vel_x = (0.0, 0.8)
         self.commands.base_velocity.ranges.lin_vel_y = (-0.0, 0.0)
         self.commands.base_velocity.ranges.ang_vel_z = (0.0, 0.0)
         

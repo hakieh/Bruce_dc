@@ -1,0 +1,15 @@
+2025-04-25 00:53:25 - Main.OnMyPolicyRunner - INFO - --------------DynamicSynapse---------------
+2025-04-25 00:53:25 - Main.OnMyPolicyRunner - INFO - lr:0.01
+2025-04-25 00:53:25 - Main.OnMyPolicyRunner - INFO - dt:20
+2025-04-25 00:53:25 - Main.OnMyPolicyRunner - INFO - period:6000
+2025-04-25 00:53:25 - Main.OnMyPolicyRunner - INFO - t_in_period:None
+2025-04-25 00:53:25 - Main.OnMyPolicyRunner - INFO - period_var:0.1
+2025-04-25 00:53:25 - Main.OnMyPolicyRunner - INFO - amp_init:0.005
+2025-04-25 00:53:25 - Main.OnMyPolicyRunner - INFO - amp_upperbound:0.1
+2025-04-25 00:53:25 - Main.OnMyPolicyRunner - INFO - amp_lowerbound:0
+2025-04-25 00:53:25 - Main.OnMyPolicyRunner - INFO - amp_offset:0.0
+2025-04-25 00:53:25 - Main.OnMyPolicyRunner - INFO - amp_update_rate:0.001
+2025-04-25 00:53:25 - Main.OnMyPolicyRunner - INFO - weight_centre_update_rate:0.1
+2025-04-25 00:53:25 - Main.OnMyPolicyRunner - INFO - oscillating:True
+2025-04-25 00:53:25 - Main.OnMyPolicyRunner - INFO - using_adapter:False
+2025-04-25 00:53:25 - Main.OnMyPolicyRunner - INFO - adapter_warm_up:0

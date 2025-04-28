@@ -47,7 +47,7 @@ if args_cli.task ==None:
 if args_cli.num_envs == None:
     args_cli.num_envs = 1
 if args_cli.load_run ==None:
-    args_cli.load_run ="2025-03-30_14-43-24"
+    args_cli.load_run ="2025-03-24_19-18-17"
 # args_cli.checkpoint="2025-03-24_19-18-17/model_1000.pt."
 #a
 # launch omniverse app
